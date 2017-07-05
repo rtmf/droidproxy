@@ -1,7 +1,23 @@
-all: proxy
+OUT := $(PWD)/build
+BIN := $(OUT)/proxy
+SRC := proxy.c
+OBJ := $(SRC:%.c=$(OUT)/%.o)
 
-%.o: %.c
+
+all: $(BIN)
+
+$(OUT):
+	mkdir -p $(OUT)
+
+$(OUT)/%.o: %.c $(OUT)
 	gcc -c $< -o $@
 
-proxy: proxy.o
+$(BIN): $(OBJ)
 	gcc $^ -o $@
+
+clean:
+	rm -rf $(OUT)
+
+install: $(BIN)
+	ts /system/xbin/mount -o remount,rw /system
+	ts cp $(BIN) /system/xbin/
