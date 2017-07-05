@@ -61,7 +61,7 @@ void ep_wr(endpoint * ep)
 	else
 		printf("Wrote %d bytes to %s of %d buffered.\n",ret,ep->name,ep->bytes);
 	ep->bytes-=ret;
-	memmove(&(ep->buffer[ret]),ep->buffer,ep->bytes);
+	memmove(ep->buffer,&(ep->buffer[ret]),ep->bytes);
 }
 int main (int argc, char * argv[])
 {
