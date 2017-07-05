@@ -1,0 +1,78 @@
+TAG+="systemd", MODE="0664", GROUP="plugdev", ENV{SYSTEMD_WANTS}="droidproxy.service"
+#Acer
+SUBSYSTEM=="usb", ATTR{idVendor}=="0502", TAG+="android-device"
+#ASUS
+SUBSYSTEM=="usb", ATTR{idVendor}=="0b05", TAG+="android-device"
+#Dell
+SUBSYSTEM=="usb", ATTR{idVendor}=="413c", TAG+="android-device"
+#Foxconn
+SUBSYSTEM=="usb", ATTR{idVendor}=="0489", TAG+="android-device"
+#Fujitsu & Fujitsu Toshiba
+SUBSYSTEM=="usb", ATTR{idVendor}=="04c5", TAG+="android-device"
+#Garmin-Asus
+SUBSYSTEM=="usb", ATTR{idVendor}=="091e", TAG+="android-device"
+#Google
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", TAG+="android-device"
+#Haier
+SUBSYSTEM=="usb", ATTR{idVendor}=="201e", TAG+="android-device"
+#Hisense
+SUBSYSTEM=="usb", ATTR{idVendor}=="109b", TAG+="android-device"
+#HTC
+SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", TAG+="android-device"
+#Huawei
+SUBSYSTEM=="usb", ATTR{idVendor}=="12d1", TAG+="android-device"
+#Intel
+SUBSYSTEM=="usb", ATTR{idVendor}=="8087", ATTR{idProduct}=="09ef", TAG+="android-device"
+SUBSYSTEM=="usb", ATTR{idVendor}=="8087", ATTR{idProduct}=="0a16", TAG+="android-device"
+#K-Touch
+SUBSYSTEM=="usb", ATTR{idVendor}=="24e3", TAG+="android-device"
+#KT Tech
+SUBSYSTEM=="usb", ATTR{idVendor}=="2116", TAG+="android-device"
+#Kyocera
+SUBSYSTEM=="usb", ATTR{idVendor}=="0482", TAG+="android-device"
+#Lenovo
+SUBSYSTEM=="usb", ATTR{idVendor}=="17ef", TAG+="android-device"
+#LG
+SUBSYSTEM=="usb", ATTR{idVendor}=="1004", TAG+="android-device"
+#Motorola
+SUBSYSTEM=="usb", ATTR{idVendor}=="22b8", TAG+="android-device"
+#MTK
+SUBSYSTEM=="usb", ATTR{idVendor}=="0e8d", TAG+="android-device"
+#NEC
+SUBSYSTEM=="usb", ATTR{idVendor}=="0409", TAG+="android-device"
+#Nook
+SUBSYSTEM=="usb", ATTR{idVendor}=="2080", TAG+="android-device"
+#Nvidia
+SUBSYSTEM=="usb", ATTR{idVendor}=="0955", TAG+="android-device"
+#OTGV
+SUBSYSTEM=="usb", ATTR{idVendor}=="2257", TAG+="android-device"
+#Pantech
+SUBSYSTEM=="usb", ATTR{idVendor}=="10a9", TAG+="android-device"
+#Pegatron
+SUBSYSTEM=="usb", ATTR{idVendor}=="1d4d", TAG+="android-device"
+#Philips
+SUBSYSTEM=="usb", ATTR{idVendor}=="0471", TAG+="android-device"
+#PMC-Sierra
+SUBSYSTEM=="usb", ATTR{idVendor}=="04da", TAG+="android-device"
+#Qualcomm
+SUBSYSTEM=="usb", ATTR{idVendor}=="05c6", TAG+="android-device"
+#SK Telesys
+SUBSYSTEM=="usb", ATTR{idVendor}=="1f53", TAG+="android-device"
+#Samsung
+SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", TAG+="android-device"
+#Sharp
+SUBSYSTEM=="usb", ATTR{idVendor}=="04dd", TAG+="android-device"
+#Sony
+SUBSYSTEM=="usb", ATTR{idVendor}=="054c", TAG+="android-device"
+#Sony Ericsson
+SUBSYSTEM=="usb", ATTR{idVendor}=="0fce", TAG+="android-device"
+#Teleepoch
+SUBSYSTEM=="usb", ATTR{idVendor}=="2340", TAG+="android-device"
+#Toshiba
+SUBSYSTEM=="usb", ATTR{idVendor}=="0930", TAG+="android-device"
+#ZTE
+SUBSYSTEM=="usb", ATTR{idVendor}=="19d2", TAG+="android-device"
+#ZUK
+SUBSYSTEM=="usb", ATTR{idVendor}=="2b4c", TAG+="android-device"
+TAG=="android-device", SYMLINK="/dev/droid", MODE="0664", GROUP="plugdev", ENV{SYSTEMD_WANTS}="droidproxy.service", TAG+="systemd"
+

@@ -1,0 +1,14 @@
+[Unit]
+Description=DroidProxy
+StopWhenUnneeded=yes
+
+[Service]
+Type=simple
+ExecStart=/opt/droidproxy/droidproxy.sh
+ExecStop=/usr/bin/killall -9 openvpn
+RemainAfterExit=no
+KillMode=none
+
+[Install]
+WantedBy=multi-user.target
+
