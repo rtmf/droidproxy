@@ -54,11 +54,6 @@ void ep_rd(endpoint * ep)
 		fprintf(stderr,"Error reading from %s for %s.\n",ep->name,ep->to->name);
 		die("ep_rd",7);
 	}
-	if (ret==0)
-	{
-		fprintf(stderr,"Read 0 bytes from %s, link dead.\n",ep->name);
-		die("read0",0);
-	}
 #ifdef DEBUG
 	else
 		printf("Buffered %d bytes from %s for %s.\n",ret,ep->name,ep->to->name);
