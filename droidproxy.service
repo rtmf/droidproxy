@@ -3,12 +3,14 @@ Description=DroidProxy
 StopWhenUnneeded=yes
 
 [Service]
-Type=simple
-ExecStart=/opt/droidproxy/droidproxy.sh
-ExecStop=/usr/bin/killall -9 openvpn
+Type=forking
+PIDFile=/opt/droidproxy/droidproxy.sh.pid
+ExecStart=/opt/droidproxy/droidproxy.sh start
+ExecStop=/opt/droidproxy/droidproxy.sh stop
+ExecReload=/opt/droidproxy/droidproxy.sh reload
 RemainAfterExit=no
-KillMode=none
+Restart=never
 
-[Install]
-WantedBy=multi-user.target
-
+#[Install]
+#WantedBy=multi-user.target
+#
