@@ -8,10 +8,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define BUFSIZE 16
+#define BUFSIZE 512
+#define WRCOUNT 512
 #define ARG_COUNT 4
 #ifndef MAX
-#define MAX(a,b) (a>b?a:b)
+#define MAX(a,b) ((a>b)?a:b)
+#endif
+#ifndef MIN
+#define MIN(a,b) ((a<b)?a:b)
 #endif
 
 #define RD(ep) if (FD_ISSET(ep.socket,&rd)) ep_rd(&ep);
@@ -51,7 +55,7 @@ typedef struct _endpoint {
 void ep_wr(endpoint * ep)
 {
 	int ret;
-	ret=write(ep->socket,ep->buffer,ep->bytes);
+	ret=write(ep->socket,ep->buffer,MIN(WRCOUNT,ep->bytes));
 	if (ret<0)
 	{
 		fprintf(stderr,"Error %d(%s) writing to %s.\n",errno,strerror(errno),ep->name);
@@ -61,8 +65,8 @@ void ep_wr(endpoint * ep)
 	else
 		printf("Wrote %d bytes to %s of %d buffered.\n",ret,ep->name,ep->bytes);
 #endif
-	ep->bytes-=ret;
 	memmove(ep->buffer,&(ep->buffer[ret]),ep->bytes);
+	ep->bytes-=ret;
 }
 void ep_rd(endpoint * ep)
 {
@@ -73,14 +77,14 @@ void ep_rd(endpoint * ep)
 		fprintf(stderr,"Error %d(%s) reading from %s for %s.\n",errno,strerror(errno),ep->name,ep->to->name);
 		die("ep_rd",7);
 	}
-#ifdef DEBUG
 	else
 	{
+#ifdef DEBUG
 		printf("Buffered %d bytes from %s for %s.\n",ret,ep->name,ep->to->name);
+#endif
+		ep->to->bytes+=ret;
 		ep_wr(ep->to);
 	}
-#endif
-	ep->to->bytes+=ret;
 }
 int main (int argc, char * argv[])
 {
