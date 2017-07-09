@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define BUFSIZE 128
+#define BUFSIZE 16
 #define ARG_COUNT 4
 #ifndef MAX
 #define MAX(a,b) (a>b?a:b)
@@ -25,15 +25,18 @@
 	if (ep.to->bytes<BUFSIZE) FD_SET(ep.socket,&rd); \
 	if (ep.bytes>0) FD_SET(ep.socket,&wr); \
 	FD_SET(ep.socket,&ex);
+
 int die(char * why, int how)
 {
 	fprintf(stderr,"%s\n",why);
 	exit(how);
 }
+
 void usage()
 {
 	die("Usage: proxy server_port remote_ip4 remote_port",1);
 }
+
 struct _endpoint;
 typedef struct _endpoint {
 	int socket;
@@ -45,29 +48,14 @@ typedef struct _endpoint {
 	int port;
 	struct _endpoint * to;
 } endpoint;
-void ep_rd(endpoint * ep)
-{
-	int ret;
-	ret=read(ep->socket,&(ep->to->buffer),BUFSIZE-ep->to->bytes);
-	if (ret<0)
-	{
-		fprintf(stderr,"Error reading from %s for %s.\n",ep->name,ep->to->name);
-		die("ep_rd",7);
-	}
-#ifdef DEBUG
-	else
-		printf("Buffered %d bytes from %s for %s.\n",ret,ep->name,ep->to->name);
-#endif
-	ep->to->bytes+=ret;
-}
 void ep_wr(endpoint * ep)
 {
 	int ret;
 	ret=write(ep->socket,ep->buffer,ep->bytes);
 	if (ret<0)
 	{
-		fprintf(stderr,"Error writing to %s.\n",ep->name);
-		die("ep_rd",8);
+		fprintf(stderr,"Error %d(%s) writing to %s.\n",errno,strerror(errno),ep->name);
+		die("ep_wr",8);
 	}
 #ifdef DEBUG
 	else
@@ -75,6 +63,24 @@ void ep_wr(endpoint * ep)
 #endif
 	ep->bytes-=ret;
 	memmove(ep->buffer,&(ep->buffer[ret]),ep->bytes);
+}
+void ep_rd(endpoint * ep)
+{
+	int ret;
+	ret=read(ep->socket,&(ep->to->buffer),BUFSIZE-ep->to->bytes);
+	if (ret<0)
+	{
+		fprintf(stderr,"Error %d(%s) reading from %s for %s.\n",errno,strerror(errno),ep->name,ep->to->name);
+		die("ep_rd",7);
+	}
+#ifdef DEBUG
+	else
+	{
+		printf("Buffered %d bytes from %s for %s.\n",ret,ep->name,ep->to->name);
+		ep_wr(ep->to);
+	}
+#endif
+	ep->to->bytes+=ret;
 }
 int main (int argc, char * argv[])
 {
