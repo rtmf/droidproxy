@@ -55,7 +55,7 @@ case "${TUNTYP}" in
 										busybox chmod 0644 ${SSHDKF} ${SSHDCF}
 										export LD_LIBRARY_PATH=${SSHDLD}:\${LD_LIBRARY_PATH}
 										export PATH=${TERMUX}/usr/bin:${TERMUX}/usr/bin/applets:\${PATH}
-										${SSHDIS} -f ${SSHDCF} -p ${SAPORT} -d -D
+										${SSHDIS} -f ${SSHDCF} -p ${SAPORT}
 									__SSHD_STARTUP_SCRIPT__
 								)"
 								cat =(<<<"$SSHDGO")
@@ -77,13 +77,13 @@ case "${ACTION}" in
 		do
 			PFNAME="${(P)RUNNER}"
 			RUNPID="${$(<${PFNAME}):-0}" 2>/dev/null
-			(( ${RUNPID} )) && kill 9 ${RUNPID} && rm -f ${PFNAME}
+			(( ${RUNPID} )) && kill -9 ${RUNPID} 
+			rm -f ${PFNAME}
 		done
 		;;
 	stop)
-		[ -f ${VPNPID} ] && kill -9 "$(<${VPNPID})"
-		sleep 0.5
-		[ -f ${SVCPID} ] && zsh "${THISIS}" kill
+		[ -f ${SVCPID} ] && kill -SIGINT "$(<${SVCPID})"
+		exit 0
 		#this should be enough to get the internal teardown to happen
 		;;
 	start)
@@ -96,6 +96,7 @@ case "${ACTION}" in
 		adb kill-server
 		rm -f /etc/resolv.conf
 		echo "${RESOLV}" > /etc/resolv.conf
+		(
 		adb shell "busybox killall -9 ${BINARY}"
 		case ${TUNTYP} in
 			droidproxy|dproxy|dp|droid|proxy)
@@ -126,13 +127,22 @@ case "${ACTION}" in
 				adb forward tcp:${SLPORT} tcp:${SAPORT}
 				adb push =(<<<${SSHDGO}) ${SSHDSF}
 				adb shell "/system/xbin/busybox chmod 0755 ${SSHDSF}"
-				adb shell "su -c ${SSHDSF}" &
-				sleep 5
+				adb shell "su -c ${SSHDSF}" 
 				ssh-keyscan -vvv -p ${SLPORT} localhost | tee -a ${HOME}/.ssh/known_hosts
 				ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -N -oIdentityFile=${SSHPRI} -oIdentitiesOnly=yes -oIdentityAgent=none -oNoHostAuthenticationForLocalhost=yes -oPasswordAuthentication=no -oPreferredAuthentications=publickey -oPort=${SLPORT} -T -L ${LOPORT}:${REMOTE}:${REPORT} droidproxy@localhost & 
 				;;
 		esac
 		echo "$!" > ${TUNPID}
+		trap "kill -SIGINT $(<${TUNPID})" SIGINT
+		wait "$(<${TUNPID})"
+		case "${TUNTYP}" in
+			ssh)
+				rm -rf "${SSHTMP}/"
+				;;
+		esac
+		rm -f "${TUNPID}" ) & TUNSVR="$!"
+		(
+		pkill -9 openvpn
 		openvpn --client \
 			--remote localhost ${LOPORT} \
 			--proto tcp-client\
@@ -149,14 +159,20 @@ case "${ACTION}" in
 			--route 0.0.0.0 0.0.0.0 vpn_gateway \
 			--pull &
 		echo "$!" > ${VPNPID}
-		wait "$(<${TUNPID})"
+		trap "kill -SIGINT $(<${VPNPID})" SIGINT
+		wait "$(<${VPNPID})"
+		rm -f "${VPNPID}" ) & VPNSVR="$!"
+		cleanup() {
+			[ -f ${VPNPID} ] && kill -SIGINT "$(<${VPNPID})"
+			[ -f ${TUNPID} ] && kill -SIGINT "$(<${TUNPID})"
+		}
+		trap "cleanup" SIGINT
+		wait "$TUNSVR" "$VPNSVR"
+		cleanup
+		wait "$TUNSVR" 
+		wait "$VPNSVR"
 		adb kill-server
-		kill -9 "$(<${VPNPID})"
-		kill -9 "$(<${TUNPID})"
-		rm "${VPNPID}"
-		rm "${TUNPID}"
-		rm "${SVCPID}"
-		rm -rf "${SSHTMP}/"
+		rm -f "${SVCPID}"
 		exit 0
 		;;
 	restart)

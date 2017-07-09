@@ -1,6 +1,8 @@
 [Unit]
 Description=DroidProxy
-StopWhenUnneeded=yes
+StopWhenUnneeded=true
+BindsTo=dev-droid.device
+After=dev-droid.device
 
 [Service]
 Type=forking
@@ -9,8 +11,8 @@ ExecStart=/opt/droidproxy/droidproxy.sh start
 ExecStop=/opt/droidproxy/droidproxy.sh stop
 ExecReload=/opt/droidproxy/droidproxy.sh reload
 RemainAfterExit=no
-Restart=never
+Restart=always
+KillMode=none
 
-#[Install]
-#WantedBy=multi-user.target
-#
+[Install]
+WantedBy=multi-user.target
