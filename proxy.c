@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define BUFSIZE 128
+#define BUFSIZE 16384
 #define ARG_COUNT 4
 #ifndef MAX
 #define MAX(a,b) (a>b?a:b)

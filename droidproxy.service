@@ -14,5 +14,3 @@ RemainAfterExit=no
 Restart=always
 KillMode=none
 
-[Install]
-WantedBy=multi-user.target

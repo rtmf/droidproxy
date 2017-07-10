@@ -13,7 +13,7 @@ REMOTE="74.207.244.165"
 REPORT="1057"
 ANPORT="8008"
 LOPORT="8483"
-TUNTYP="ssh" 
+TUNTYP="droidproxy" 
 DNSSRV="${REMOTE}"
 DNSDOM="${DOMAIN}"
 SEARCH="tesayon.xh cccn.xh xh"
@@ -157,6 +157,9 @@ case "${ACTION}" in
 			--script-security 2 \
 			--tls-client \
 			--route 0.0.0.0 0.0.0.0 vpn_gateway \
+			--sndbuf 1 \
+			--rcvbuf 1 \
+			--socket-flags TCP_NODELAY \
 			--pull &
 		echo "$!" > ${VPNPID}
 		trap "kill -SIGINT $(<${VPNPID})" SIGINT

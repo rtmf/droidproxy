@@ -75,5 +75,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="19d2", TAG+="android-device"
 SUBSYSTEM=="usb", ATTR{idVendor}=="2b4c", TAG+="android-device"
 #Coolpad
 SUBSYSTEM=="usb", ATTR{idVendor}=="1ebf", TAG+="android-device"
+#alcatel
+SUBSYSTEM=="usb", ATTR{idVendor}=="1bbb", TAG+="android-device"
 
 TAG=="android-device", SYMLINK+="droid", MODE="0664", GROUP="plugdev", ENV{SYSTEMD_WANTS}="droidproxy.service", TAG+="systemd"
