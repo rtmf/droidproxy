@@ -8,10 +8,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define BUFSIZE 16384
+#define BUFSIZE 512
+#define WRCOUNT 512
 #define ARG_COUNT 4
 #ifndef MAX
-#define MAX(a,b) (a>b?a:b)
+#define MAX(a,b) ((a>b)?a:b)
+#endif
+#ifndef MIN
+#define MIN(a,b) ((a<b)?a:b)
 #endif
 
 #define RD(ep) if (FD_ISSET(ep.socket,&rd)) ep_rd(&ep);
@@ -25,15 +29,18 @@
 	if (ep.to->bytes<BUFSIZE) FD_SET(ep.socket,&rd); \
 	if (ep.bytes>0) FD_SET(ep.socket,&wr); \
 	FD_SET(ep.socket,&ex);
+
 int die(char * why, int how)
 {
 	fprintf(stderr,"%s\n",why);
 	exit(how);
 }
+
 void usage()
 {
 	die("Usage: proxy server_port remote_ip4 remote_port",1);
 }
+
 struct _endpoint;
 typedef struct _endpoint {
 	int socket;
@@ -45,36 +52,39 @@ typedef struct _endpoint {
 	int port;
 	struct _endpoint * to;
 } endpoint;
+void ep_wr(endpoint * ep)
+{
+	int ret;
+	ret=write(ep->socket,ep->buffer,MIN(WRCOUNT,ep->bytes));
+	if (ret<0)
+	{
+		fprintf(stderr,"Error %d(%s) writing to %s.\n",errno,strerror(errno),ep->name);
+		die("ep_wr",8);
+	}
+#ifdef DEBUG
+	else
+		printf("Wrote %d bytes to %s of %d buffered.\n",ret,ep->name,ep->bytes);
+#endif
+	memmove(ep->buffer,&(ep->buffer[ret]),ep->bytes);
+	ep->bytes-=ret;
+}
 void ep_rd(endpoint * ep)
 {
 	int ret;
 	ret=read(ep->socket,&(ep->to->buffer),BUFSIZE-ep->to->bytes);
 	if (ret<0)
 	{
-		fprintf(stderr,"Error reading from %s for %s.\n",ep->name,ep->to->name);
+		fprintf(stderr,"Error %d(%s) reading from %s for %s.\n",errno,strerror(errno),ep->name,ep->to->name);
 		die("ep_rd",7);
 	}
-#ifdef DEBUG
 	else
+	{
+#ifdef DEBUG
 		printf("Buffered %d bytes from %s for %s.\n",ret,ep->name,ep->to->name);
 #endif
-	ep->to->bytes+=ret;
-}
-void ep_wr(endpoint * ep)
-{
-	int ret;
-	ret=write(ep->socket,ep->buffer,ep->bytes);
-	if (ret<0)
-	{
-		fprintf(stderr,"Error writing to %s.\n",ep->name);
-		die("ep_rd",8);
+		ep->to->bytes+=ret;
+		ep_wr(ep->to);
 	}
-#ifdef DEBUG
-	else
-		printf("Wrote %d bytes to %s of %d buffered.\n",ret,ep->name,ep->bytes);
-#endif
-	ep->bytes-=ret;
-	memmove(ep->buffer,&(ep->buffer[ret]),ep->bytes);
 }
 int main (int argc, char * argv[])
 {
